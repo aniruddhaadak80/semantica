@@ -36,6 +36,15 @@ jobs:
       - name: Build image
         run: docker build -t semantica:scan .
 
+      - name: DIAGNOSTIC - inspect installed packages
+        run: |
+          docker run --rm --entrypoint sh semantica:scan -c '
+            echo "--- pip list ---"
+            pip list 2>/dev/null | grep -i "msgpack\|setuptools"
+            echo "--- dist-info / egg-info dirs ---"
+            find / -xdev -iname "*msgpack*" -o -iname "*setuptools*" 2>/dev/null | grep -v "/proc/"
+          '
+
       # Run Trivy as a digest-pinned image rather than the aquasecurity/trivy-action
       # marketplace wrapper: the aquasecurity GitHub org has an IP allow list on its
       # API that 403s verify-action-pins.sh's live tag->SHA check from Actions-runner
